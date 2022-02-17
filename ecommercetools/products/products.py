@@ -138,6 +138,9 @@ def get_repurchase_rates(df):
     # Calculate unique SKU per order
     df['skus_per_order'] = df.groupby('order_id')['sku'].transform('count')
 
+    # Calculate basket turnover per order
+    df['basket_turnover'] = df.groupby('order_id')['line_price'].transform('sum')
+
     # Get unique SKUs and count total items, orders, and customers
     df_skus = df.groupby('sku').agg(
         revenue=('line_price', 'sum'),
@@ -146,7 +149,8 @@ def get_repurchase_rates(df):
         customers=('customer_id', 'nunique'),
         avg_unit_price=('unit_price', 'mean'),
         avg_line_price=('line_price', 'mean'),
-        avg_skus_per_order=('skus_per_order', 'mean')
+        avg_skus_per_order=('skus_per_order', 'mean'),
+        avg_order_value=('basket_turnover', 'mean')
     )
 
     # Calculate the average number of units per order
@@ -168,6 +172,7 @@ def get_repurchase_rates(df):
     df_skus = df_skus.assign(repurchases=(df_skus['orders'] - df_skus['purchased_once']))
     df_skus = df_skus.assign(repurchase_rate=(df_skus['repurchases'] / df_skus['orders']))
     df_skus = df_skus.assign(avg_skus_per_order_rate=(np.log(df_skus['avg_skus_per_order'])))
+    df_skus = df_skus.assign(avg_order_value_rate=(np.log(df_skus['avg_order_value'])))
 
     # Add labels
     df_skus = get_repurchase_rate_label(df_skus)
