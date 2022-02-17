@@ -167,7 +167,7 @@ def get_repurchase_rates(df):
     # Calculate repurchase rates
     df_skus = df_skus.assign(repurchases=(df_skus['orders'] - df_skus['purchased_once']))
     df_skus = df_skus.assign(repurchase_rate=(df_skus['repurchases'] / df_skus['orders']))
-    df_skus = df_skus.assign(avg_skus_per_order_rate=(np.log(df['avg_skus_per_order'])))
+    df_skus = df_skus.assign(avg_skus_per_order_rate=(np.log(df_skus['avg_skus_per_order'])))
 
     # Add labels
     df_skus = get_repurchase_rate_label(df_skus)
