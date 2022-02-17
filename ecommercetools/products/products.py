@@ -80,6 +80,29 @@ def get_bulk_purchase_rate_label(df):
     return df
 
 
+def get_skus_per_order_label(df):
+    """Add a label describing the skus per order bin.
+
+    Args:
+        df (object): Pandas DataFrame containing avg_skus_per_order.
+
+    Returns:
+    -------
+        df (object): Pandas DataFrame with avg_skus_per_order added.
+    """
+
+    labels = ['Very poor basket ',
+              'Poor basket',
+              'Average basket',
+              'Big basket',
+              'Very big basket']
+    df['avg_skus_per_order_label'] = pd.cut(df['avg_skus_per_order'],
+                                            bins=5,
+                                            labels=labels)
+    return df
+
+
+
 def get_repurchase_rates(df):
     """Return repurchase rates and purchase behaviour for each SKU from transaction items data.
 
@@ -110,6 +133,9 @@ def get_repurchase_rates(df):
     # Calculate line price
     df['line_price'] = df['unit_price'] * df['quantity']
 
+    # Calculate unique SKU per order
+    df['skus_per_order'] = df.groupby('order_id')['sku'].transform('count')
+
     # Get unique SKUs and count total items, orders, and customers
     df_skus = df.groupby('sku').agg(
         revenue=('line_price', 'sum'),
@@ -117,7 +143,8 @@ def get_repurchase_rates(df):
         orders=('order_id', 'nunique'),
         customers=('customer_id', 'nunique'),
         avg_unit_price=('unit_price', 'mean'),
-        avg_line_price=('line_price', 'mean')
+        avg_line_price=('line_price', 'mean'),
+        avg_skus_per_order=('skus_per_order', 'mean')
     )
 
     # Calculate the average number of units per order
@@ -142,6 +169,7 @@ def get_repurchase_rates(df):
     # Add labels
     df_skus = get_repurchase_rate_label(df_skus)
     df_skus = get_bulk_purchase_rate_label(df_skus)
+    df_skus = get_skus_per_order_label(df_skus)
 
     df_skus['bulk_and_repurchase_label'] = df_skus['repurchase_rate_label'].astype(str) + \
                                            '_' + df_skus['bulk_purchase_rate_label'].astype(str)
