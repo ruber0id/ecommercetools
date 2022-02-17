@@ -1,5 +1,6 @@
 import pandas as pd
 from ecommercetools.utilities import tools
+import numpy as np
 
 
 def get_products(transaction_items, days=None):
@@ -74,7 +75,7 @@ def get_bulk_purchase_rate_label(df):
               'Moderate bulk',
               'High bulk',
               'Very high bulk']
-    df['bulk_purchase_rate_label'] = pd.cut(df['bulk_purchase_rate'],
+    df['bulk_purchase_rate_label'] = pd.cut(np.log(df['bulk_purchase_rate']),
                                             bins=5,
                                             labels=labels)
     return df
