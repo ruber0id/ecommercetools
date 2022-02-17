@@ -2,6 +2,7 @@ import pandas as pd
 from ecommercetools.utilities import tools
 import numpy as np
 
+np.seterr(divide='ignore')
 
 def get_products(transaction_items, days=None):
     """Return a Pandas DataFrame of products from a Pandas DataFrame of transaction items.
@@ -75,7 +76,7 @@ def get_bulk_purchase_rate_label(df):
               'Moderate bulk',
               'High bulk',
               'Very high bulk']
-    df['bulk_purchase_rate_label'] = pd.cut(np.log(df['bulk_purchase_rate']),
+    df['bulk_purchase_rate_label'] = pd.cut(df['bulk_purchase_rate'],
                                             bins=5,
                                             labels=labels)
     return df
@@ -97,7 +98,7 @@ def get_skus_per_order_label(df):
               'Average basket',
               'Big basket',
               'Very big basket']
-    df['avg_skus_per_order_label'] = pd.cut(df['avg_skus_per_order'],
+    df['avg_skus_per_order_label'] = pd.cut(np.log(df['avg_skus_per_order']),
                                             bins=5,
                                             labels=labels)
     return df
